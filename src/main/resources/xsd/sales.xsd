@@ -1,0 +1,61 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://demo.com/schema/sales"
+           targetNamespace="http://demo.com/schema/sales" elementFormDefault="qualified">
+
+    <xs:element name="getCustomerRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="id" type="xs:int"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getCustomerResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="customer" type="tns:customer"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="getCustomersRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="firstname" type="xs:string" minOccurs="0" />
+                <xs:element name="lastname" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getCustomersResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="customers" type="tns:customers"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="customer">
+        <xs:sequence>
+        	<xs:element name="id" type="xs:int"/>
+            <xs:element name="firstname" type="xs:string"/>
+            <xs:element name="lastname" type="xs:string"/>
+            <xs:element name="street" type="xs:string"/>
+            <xs:element name="city" type="tns:city"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="city">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Lima"/>
+            <xs:enumeration value="Quito"/>
+            <xs:enumeration value="Bogota"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="customers">
+		<xs:sequence>
+	        <xs:element maxOccurs="unbounded" name="customer" type="tns:customer" />
+	   </xs:sequence>
+  	</xs:complexType>
+    
+</xs:schema>
