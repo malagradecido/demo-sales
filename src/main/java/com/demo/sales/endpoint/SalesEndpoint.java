@@ -10,12 +10,12 @@ import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import com.demo.sales.dto.CustomerDTO;
 import com.demo.sales.services.ISalesService;
-import com.demo.schema.sales.Customer;
-import com.demo.schema.sales.Customers;
-import com.demo.schema.sales.GetCustomerRequest;
-import com.demo.schema.sales.GetCustomerResponse;
-import com.demo.schema.sales.GetCustomersRequest;
-import com.demo.schema.sales.GetCustomersResponse;
+import com.demo.sales.schema.Customer;
+import com.demo.sales.schema.Customers;
+import com.demo.sales.schema.GetCustomerRequest;
+import com.demo.sales.schema.GetCustomerResponse;
+import com.demo.sales.schema.GetCustomersRequest;
+import com.demo.sales.schema.GetCustomersResponse;
 
 @Endpoint
 public class SalesEndpoint {
