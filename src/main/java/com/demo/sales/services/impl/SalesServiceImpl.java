@@ -17,8 +17,10 @@ public class SalesServiceImpl implements ISalesService {
 	
 	@Override
 	public CustomerDTO getCustomer(CustomerDTO pcustomerDTO) {
+		CustomerDTO customer = null;
 		
-		CustomerDTO customer = iSalesDAO.getCustomer(pcustomerDTO);
+		if(pcustomerDTO.getId() > 0)
+			customer = iSalesDAO.getCustomer(pcustomerDTO);
 		
 		return customer;
 	}

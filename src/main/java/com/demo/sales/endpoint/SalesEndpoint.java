@@ -33,13 +33,16 @@ private static final String NAMESPACE_URI = "http://demo.com/schema/sales";
 		CustomerDTO parameters = new CustomerDTO(request.getId());
 		CustomerDTO customerDTO = iSalesService.getCustomer(parameters);
 		
-		Customer customer = new Customer();
-		customer.setId(customerDTO.getId());
-		customer.setFirstname(customerDTO.getFirstname());
-		customer.setLastname(customerDTO.getLastname());
-		customer.setStreet(customerDTO.getStreet());
+		Customer customer = null;
 		
-		response.setCustomer(customer);
+		if(customerDTO != null) {
+			customer = new Customer();
+			customer.setId(customerDTO.getId());
+			customer.setFirstname(customerDTO.getFirstname());
+			customer.setLastname(customerDTO.getLastname());
+			customer.setStreet(customerDTO.getStreet());
+			response.setCustomer(customer);
+		}
 		
 		return response;
 	}
@@ -54,16 +57,20 @@ private static final String NAMESPACE_URI = "http://demo.com/schema/sales";
 		List<CustomerDTO> customersDTO = iSalesService.getCustomers(parameters);
 		
 		Customers customers = new Customers();
-		customersDTO.forEach( customerDTO ->  {
-			Customer customer = new Customer();
-			customer.setId(customerDTO.getId());
-			customer.setFirstname(customerDTO.getFirstname());
-			customer.setLastname(customerDTO.getLastname());
-			customer.setStreet(customerDTO.getStreet());
-			customers.getCustomer().add(customer);
-		});
 		
-		response.setCustomers(customers);
+		if(customersDTO != null) {
+			
+			customersDTO.forEach( customerDTO ->  {
+				Customer customer = new Customer();
+				customer.setId(customerDTO.getId());
+				customer.setFirstname(customerDTO.getFirstname());
+				customer.setLastname(customerDTO.getLastname());
+				customer.setStreet(customerDTO.getStreet());
+				customers.getCustomer().add(customer);
+			});
+			
+			response.setCustomers(customers);
+		}
 		
 		return response;
 	}
