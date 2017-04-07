@@ -14,30 +14,33 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+//import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Component;
 
 import com.demo.sales.dao.ISalesDAO;
 import com.demo.sales.dto.CustomerDTO;
+import com.demo.sales.dto.CustomerNamesDTO;
 
 @Component
 public class SalesJdbcDAOImpl implements ISalesDAO {
 	
 	private static final Logger logger = Logger.getLogger(SalesJdbcDAOImpl.class);
 
-	JdbcTemplate jdbcTemplate;
-	NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+	private JdbcTemplate jdbcTemplate;
+//	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
 	@Autowired
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 	
 	private SimpleJdbcCall procGetCustomer;
 	private SimpleJdbcCall procGetCustomers;
+	private SimpleJdbcCall procGetFirstnames;
 	
 	@PostConstruct
 	public void init() {
@@ -60,6 +63,15 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
                 .declareParameters(
                         new SqlParameter("firstname", Types.VARCHAR),
                         new SqlParameter("lastname", Types.VARCHAR));
+        
+        this.procGetFirstnames = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("GET_FIRSTNAMES")
+                .returningResultSet("result-set-1",
+                BeanPropertyRowMapper.newInstance(CustomerNamesDTO.class))
+                .useInParameterNames("ids")
+                .declareParameters(
+                        new SqlParameter("ids", Types.ARRAY));
+        
 	}
 	
 	@Override
@@ -72,7 +84,7 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 		@SuppressWarnings("unchecked")
 		List<CustomerDTO> customers = (ArrayList<CustomerDTO>) map.get("result-set-1");
 		
-		customers.forEach( customer -> logger.info(customer) );
+		customers.forEach( customer -> logger.info("1.customer: " + customer) );
 		
 		return customers.size() > 0 ? customers.get(0) : null;
 	}
@@ -87,8 +99,37 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 		@SuppressWarnings("unchecked")
 		List<CustomerDTO> customers = (ArrayList<CustomerDTO>) map.get("result-set-1");
 		
-		customers.forEach( customer -> logger.info(customer) );
+		//customers.forEach( customer -> logger.info("2.customer: " + customer) );
 		
 		return customers;
 	}
+	
+	@Override
+	public List<String> getCustomerNamesByIds(Integer[] ids) {
+
+		SqlParameterSource parameters =
+				new MapSqlParameterSource("ids", ids);
+		
+		Map<String, Object> map = procGetFirstnames.execute(parameters);
+		List<String> names = new ArrayList<>();
+		
+		@SuppressWarnings("unchecked")
+		List<CustomerNamesDTO> namesJdbcArray = (ArrayList<CustomerNamesDTO>) map.get("result-set-1");
+		
+		if(namesJdbcArray != null) {
+			namesJdbcArray.forEach( nameJdbcArray -> {
+				
+				Object[] arrNames = nameJdbcArray.getFirstnames() == null ? 
+						new Object[]{} : nameJdbcArray.getFirstnames().getArrayInternal();
+				
+				for (Object name : arrNames) {
+					names.add(name.toString());
+				}
+			});
+		}
+		
+		
+		return names;
+	}
+	
 }

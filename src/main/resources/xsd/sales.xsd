@@ -1,6 +1,23 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:tns="http://demo.com/sales/schema" targetNamespace="http://demo.com/sales/schema"
+	targetNamespace="http://demo.com/sales/schema"
+	xmlns:tns="http://demo.com/sales/schema" 
 	elementFormDefault="qualified">
+
+	<xs:element name="getFirstnamesRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ids" type="tns:ids" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="getFirstnamesResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="firstnames" type="tns:firstnames" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 
 	<xs:element name="getCustomerRequest">
 		<xs:complexType>
@@ -42,6 +59,18 @@
 			<xs:element name="lastname" type="xs:string" />
 			<xs:element name="street" type="xs:string" />
 			<xs:element name="city" type="tns:city" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="firstnames">
+		<xs:sequence>
+			<xs:element maxOccurs="unbounded" name="firstname" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="ids" >
+		<xs:sequence>
+			<xs:element maxOccurs="unbounded" name="id" type="tns:id" />
 		</xs:sequence>
 	</xs:complexType>
 

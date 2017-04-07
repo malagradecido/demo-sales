@@ -5,12 +5,15 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.demo.sales.dto.CustomerDTO;
+import com.demo.sales.exception.BusinessLogicException;
 
 @Service
 public interface ISalesService {
 
-	CustomerDTO getCustomer(CustomerDTO pcustomerDTO);
+	CustomerDTO getCustomer(CustomerDTO pcustomerDTO) throws BusinessLogicException;
 
-	List<CustomerDTO> getCustomers(CustomerDTO pcustomerDTO);
+	List<CustomerDTO> getCustomers(CustomerDTO pcustomerDTO) throws BusinessLogicException;
+
+	List<String> getFirstnames(Integer[] ids) throws BusinessLogicException;
 
 }

@@ -12,4 +12,6 @@ public interface ISalesDAO {
 	CustomerDTO getCustomer(CustomerDTO customerDTO);
 
 	List<CustomerDTO> getCustomers(CustomerDTO customerDTO);
+
+	List<String> getCustomerNamesByIds(Integer[] ids);
 }

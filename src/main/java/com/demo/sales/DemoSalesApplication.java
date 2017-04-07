@@ -21,6 +21,7 @@ public class DemoSalesApplication {
 	@Bean
 	CommandLineRunner lookup(ISalesDAO iSalesDAO) {
 		return args -> {
+			//iSalesDAO.viewArray();
 			CustomerDTO customerDTO = new CustomerDTO(1);
 			customerDTO = iSalesDAO.getCustomer(customerDTO);
 			logger.info(customerDTO);
