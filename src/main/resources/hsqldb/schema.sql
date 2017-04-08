@@ -39,5 +39,5 @@ CREATE PROCEDURE GET_FIRSTNAMES(in_ids INT ARRAY)
 	  WHERE ID IN ( UNNEST(in_ids) );
      OPEN result;
    END
-   
+     
 /;

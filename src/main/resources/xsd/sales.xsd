@@ -51,6 +51,22 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+	
+	<xs:element name="makePurchaseRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="purchase" type="tns:purchase" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="makePurchaseResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="message" type="tns:message" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 
 	<xs:complexType name="customer">
 		<xs:sequence>
@@ -59,6 +75,30 @@
 			<xs:element name="lastname" type="xs:string" />
 			<xs:element name="street" type="xs:string" />
 			<xs:element name="city" type="tns:city" />
+		</xs:sequence>
+	</xs:complexType>
+		
+	<xs:complexType name="invoice">
+		<xs:sequence>
+			<xs:element name="id" type="tns:id" />
+			<xs:element name="customerId" type="xs:integer" />
+			<xs:element name="total" type="xs:decimal" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="purchase">
+		<xs:sequence>
+			<xs:element name="customerId" type="tns:id" />
+			<xs:element name="total" type="xs:decimal" />
+			<xs:element name="newItem" type="tns:newItem" />
+		</xs:sequence>
+	</xs:complexType>
+		
+	<xs:complexType name="newItem">
+		<xs:sequence>
+			<xs:element name="productId" type="tns:id" />
+			<xs:element name="quantity" type="xs:integer" />
+			<xs:element name="cost" type="xs:integer" />
 		</xs:sequence>
 	</xs:complexType>
 	
@@ -71,6 +111,13 @@
 	<xs:complexType name="ids" >
 		<xs:sequence>
 			<xs:element maxOccurs="unbounded" name="id" type="tns:id" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="message">
+		<xs:sequence>
+			<xs:element name="code" type="xs:string" />
+			<xs:element name="description" type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
 

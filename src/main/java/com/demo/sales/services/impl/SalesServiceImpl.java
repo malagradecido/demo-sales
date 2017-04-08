@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.demo.sales.dao.ISalesDAO;
 import com.demo.sales.dto.CustomerDTO;
+import com.demo.sales.dto.MessageDTO;
 import com.demo.sales.exception.BusinessLogicException;
 import com.demo.sales.services.ISalesService;
 import com.demo.sales.util.BasicSupport;
@@ -82,4 +83,5 @@ public class SalesServiceImpl implements ISalesService {
 		
 		return firstnames;
 	}
+
 }
