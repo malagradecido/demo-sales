@@ -6,8 +6,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import com.demo.sales.bean.CustomerBean;
 import com.demo.sales.dao.ISalesDAO;
-import com.demo.sales.dto.CustomerDTO;
 
 @SpringBootApplication
 public class DemoSalesApplication {
@@ -22,7 +22,7 @@ public class DemoSalesApplication {
 	CommandLineRunner lookup(ISalesDAO iSalesDAO) {
 		return args -> {
 			//iSalesDAO.viewArray();
-			CustomerDTO customerDTO = new CustomerDTO(1);
+			CustomerBean customerDTO = new CustomerBean(1);
 			customerDTO = iSalesDAO.getCustomer(customerDTO);
 			logger.info(customerDTO);
 			//System.err.println(response.getGetQuoteResult());

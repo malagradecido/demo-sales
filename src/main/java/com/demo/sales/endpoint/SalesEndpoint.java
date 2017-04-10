@@ -1,5 +1,6 @@
 package com.demo.sales.endpoint;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +16,10 @@ import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 import org.springframework.ws.server.endpoint.annotation.XPathParam;
 import org.w3c.dom.NodeList;
 
-import com.demo.sales.dto.CustomerDTO;
-import com.demo.sales.dto.InvoiceDTO;
-import com.demo.sales.dto.ItemDTO;
-import com.demo.sales.dto.MessageDTO;
+import com.demo.sales.bean.CustomerBean;
+import com.demo.sales.bean.InvoiceBean;
+import com.demo.sales.bean.ItemBean;
+import com.demo.sales.bean.MessageBean;
 import com.demo.sales.exception.BusinessLogicException;
 import com.demo.sales.exception.ServiceFaultException;
 import com.demo.sales.exception.support.ServiceFault;
@@ -33,6 +34,12 @@ import com.demo.sales.schema.GetCustomersRequest;
 import com.demo.sales.schema.GetCustomersResponse;
 import com.demo.sales.schema.GetFirstnamesRequest;
 import com.demo.sales.schema.GetFirstnamesResponse;
+import com.demo.sales.schema.GetInvoiceDetailRequest;
+import com.demo.sales.schema.GetInvoiceDetailResponse;
+import com.demo.sales.schema.Invoice;
+import com.demo.sales.schema.Invoices;
+import com.demo.sales.schema.Item;
+import com.demo.sales.schema.Items;
 import com.demo.sales.schema.MakePurchaseRequest;
 import com.demo.sales.schema.MakePurchaseResponse;
 import com.demo.sales.schema.Message;
@@ -52,13 +59,13 @@ public class SalesEndpoint {
 		
 		GetCustomerResponse response = new GetCustomerResponse();
 		
-		CustomerDTO parameters = new CustomerDTO(request.getId());
-		CustomerDTO customerDTO = null;
+		CustomerBean parameters = new CustomerBean(request.getId());
+		CustomerBean customerDTO = null;
 		
 		try {
 			customerDTO = iSalesService.getCustomer(parameters);
 		} catch (BusinessLogicException e) {
-			throw new ServiceFaultException("ERROR", 
+			throw new ServiceFaultException("WS_ERROR", 
 					new ServiceFault( e.getCode() , e.getDescription() ));
 		}
 		
@@ -92,7 +99,7 @@ public class SalesEndpoint {
 			List<String> lstFirstnames = iSalesService.getFirstnames(ids);
 			firstnames.getFirstname().addAll(lstFirstnames);
 		} catch (BusinessLogicException e) {
-			throw new ServiceFaultException("ERROR", 
+			throw new ServiceFaultException("WS_ERROR", 
 					new ServiceFault( e.getCode() , e.getDescription() ));
 		}
 		response.setFirstnames(firstnames);
@@ -106,12 +113,12 @@ public class SalesEndpoint {
 				
 		GetCustomersResponse response = new GetCustomersResponse();
 		
-		CustomerDTO parameters = new CustomerDTO(request.getFirstname(), request.getLastname());
-		List<CustomerDTO> customersDTO;
+		CustomerBean parameters = new CustomerBean(request.getFirstname(), request.getLastname());
+		List<CustomerBean> customersDTO;
 		try {
 			customersDTO = iSalesService.getCustomers(parameters);
 		} catch (BusinessLogicException e) {
-			throw new ServiceFaultException("ERROR", 
+			throw new ServiceFaultException("WS_ERROR", 
 					new ServiceFault( e.getCode() , e.getDescription() ));
 		}
 		
@@ -137,28 +144,30 @@ public class SalesEndpoint {
 	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "makePurchaseRequest")
 	@Namespace(prefix="rn", uri=NAMESPACE_URI)
 	@ResponsePayload
-	public MakePurchaseResponse makePurchase(@RequestPayload MakePurchaseRequest request, @XPathParam("/rn:makePurchaseRequest/rn:purchase") NodeList purchaseNodeList) {
+	public MakePurchaseResponse makePurchase(@RequestPayload MakePurchaseRequest request, 
+			@XPathParam("/rn:makePurchaseRequest/rn:purchase") NodeList purchaseNodeList) {
 		
 		MakePurchaseResponse response = new MakePurchaseResponse();
 		try {
 			String purchaseXMLString = BasicSupport.convertNodeListToString(purchaseNodeList);			
 			logger.info("purchaseXMLString: " + purchaseXMLString);
 			
-			List<ItemDTO> items = new ArrayList<>();
+			List<ItemBean> items = new ArrayList<>();
 			
 			request.getItems().getItem().forEach(  item -> {
-				ItemDTO itemDTO = new ItemDTO(
-						item.getItem(), item.getProductId(), 
-						item.getQuantity().intValue(), 
-						item.getCost().doubleValue());
+				ItemBean itemDTO = new ItemBean(
+						item.getItem(), 
+						item.getProductId(), 
+						item.getQuantity(), 
+						item.getCost().doubleValue() );
 				
 				items.add(itemDTO);
 			});
 			
-			InvoiceDTO invoice = new InvoiceDTO(
+			InvoiceBean invoice = new InvoiceBean(
 					request.getId(), request.getCustomerId(), request.getTotal().doubleValue(), items);
 			
-			MessageDTO messageDTO = iSalesService.makePurchase(invoice);
+			MessageBean messageDTO = iSalesService.makePurchase(invoice);
 			
 			Message message = new Message();
 			message.setCode(messageDTO.getCode());
@@ -167,15 +176,67 @@ public class SalesEndpoint {
 			
 		} catch (TransformerException e) {
 			e.printStackTrace();
-			throw new ServiceFaultException("ERROR", 
+			throw new ServiceFaultException("WS_ERROR", 
 					new ServiceFault( "ERROR_CONVERT" , e.getMessage() ));
 			
 		} catch (BusinessLogicException e) {
-			throw new ServiceFaultException("ERROR", 
+			throw new ServiceFaultException("WS_ERROR", 
 					new ServiceFault( e.getCode() , e.getDescription() ));
 		}
 		
 		return response;
 	}
+	
+	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "getInvoiceDetailRequest")
+	@ResponsePayload
+	public GetInvoiceDetailResponse getInvoiceDetail(@RequestPayload GetInvoiceDetailRequest request) {
+				
+		GetInvoiceDetailResponse response = new GetInvoiceDetailResponse();
 		
+		Integer[] ids = 
+				request.getIds() == null ? 
+						null : request.getIds().getId().toArray(new Integer[request.getIds().getId().size()]);
+		
+		InvoiceBean parameters = new InvoiceBean(ids);
+		Invoices invoices = new Invoices();
+		
+		try {
+			
+			List<InvoiceBean> invoicesDTO = iSalesService.getInvoiceDetail(parameters);
+			
+			invoicesDTO.forEach( (invoiceDTO) -> {
+				
+				Invoice invoice = new Invoice();
+				invoice.setId( invoiceDTO.getId() );
+				invoice.setCustomerId( invoiceDTO.getCustomerId() );
+				invoice.setCustomerName( invoiceDTO.getCustomerName() );
+				invoice.setTotal( new BigDecimal(invoiceDTO.getTotal()) );
+				Items items = new Items();
+				
+				invoiceDTO.getItems().forEach( (itemDTO) -> {
+					
+					Item item = new Item();
+					item.setItem(itemDTO.getItem());
+					item.setProductId( itemDTO.getProductId() );
+					item.setProductName( itemDTO.getProductName() );
+					item.setCost( new BigDecimal( itemDTO.getCost() ) );
+					item.setQuantity( itemDTO.getQuantity() );
+					
+					items.getItems().add( item );
+				});
+				invoice.setItems(items);
+								
+				invoices.getInvoice().add(invoice);
+			});			
+			
+		} catch (BusinessLogicException e) {
+			throw new ServiceFaultException("WS_ERROR", 
+					new ServiceFault( e.getCode() , e.getDescription() ));
+		}
+		
+		response.setInvoices(invoices);
+		
+		return response;
+	}
+
 }

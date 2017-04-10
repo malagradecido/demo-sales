@@ -1,8 +1,8 @@
-package com.demo.sales.dto;
+package com.demo.sales.bean;
 
 import org.hsqldb.jdbc.JDBCArray;
 
-public class CustomerNamesDTO {
+public class CustomerNamesBean {
 	
 	private JDBCArray firstnames;
 

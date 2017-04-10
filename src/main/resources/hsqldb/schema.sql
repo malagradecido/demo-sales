@@ -41,3 +41,21 @@ CREATE PROCEDURE GET_FIRSTNAMES(in_ids INT ARRAY)
    END
      
 /;
+
+CREATE PROCEDURE SP_GET_INVOICE_DETAIL(in_ids INT ARRAY)
+   READS SQL DATA DYNAMIC RESULT SETS 1
+   BEGIN ATOMIC
+     DECLARE result CURSOR FOR
+     SELECT A.id, A.customerId, (C.firstName || ' ' || C.lastName) AS customerName, A.total, B.item, B.productId, D.name AS productName, B.quantity, B.cost
+	   FROM Invoice A
+ INNER JOIN Item B
+ 		 ON A.id = B.invoiceId
+ INNER JOIN Customer C
+         ON A.customerId = C.id
+ INNER JOIN Product D
+ 		 ON B.productId = D.id  
+	  WHERE A.ID IN ( UNNEST(in_ids) );
+     OPEN result;
+   END
+     
+/;

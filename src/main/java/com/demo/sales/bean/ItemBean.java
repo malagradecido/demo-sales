@@ -1,17 +1,31 @@
-package com.demo.sales.dto;
+package com.demo.sales.bean;
 
-public class ItemDTO {
+/**
+ * @author moises.veliz
+ *
+ */
+public class ItemBean {
 	
 	private Integer invoiceId;
 	private Integer item;
 	private Integer productId;
+	private String productName;
 	private Integer quantity;
 	private Double cost;
 	
-	public ItemDTO() {
+	public ItemBean() {
 	}
 	
-	public ItemDTO(Integer item, Integer productId, Integer quantity, Double cost) {
+	public ItemBean(Integer item, Integer productId, String productName, Integer quantity, Double cost) {
+		super();
+		this.item = item;
+		this.productId = productId;
+		this.productName = productName;
+		this.quantity = quantity;
+		this.cost = cost;
+	}
+	
+	public ItemBean(Integer item, Integer productId, Integer quantity, Double cost) {
 		super();
 		this.item = item;
 		this.productId = productId;
@@ -48,6 +62,14 @@ public class ItemDTO {
 	}
 	public void setCost(Double cost) {
 		this.cost = cost;
+	}
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 
 }

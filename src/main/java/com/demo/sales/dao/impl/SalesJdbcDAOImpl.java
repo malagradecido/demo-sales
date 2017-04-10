@@ -23,15 +23,14 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
+import com.demo.sales.bean.CustomerBean;
+import com.demo.sales.bean.CustomerNamesBean;
+import com.demo.sales.bean.InvoiceBean;
+import com.demo.sales.bean.ItemBean;
 import com.demo.sales.dao.ISalesDAO;
-import com.demo.sales.dto.CustomerDTO;
-import com.demo.sales.dto.CustomerNamesDTO;
-import com.demo.sales.dto.InvoiceDTO;
-import com.demo.sales.dto.ItemDTO;
 import com.demo.sales.sp.SpGetInvoiceDetail;
 import com.demo.sales.sp.SpGetSysdate;
 import com.demo.sales.sp.params.GetInvoiceDetailParams;
-import com.demo.sales.sp.rs.GetInvoiceDetailRs;
 
 @Component
 public class SalesJdbcDAOImpl implements ISalesDAO {
@@ -59,7 +58,7 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
         this.procGetCustomer = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName("GET_CUSTOMER")
                 .returningResultSet("result-set-1",
-                BeanPropertyRowMapper.newInstance(CustomerDTO.class))
+                BeanPropertyRowMapper.newInstance(CustomerBean.class))
                 .useInParameterNames("id")
                 .declareParameters(
                         new SqlParameter("id", Types.INTEGER));
@@ -67,7 +66,7 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
         this.procGetCustomers = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName("GET_CUSTOMERS")
                 .returningResultSet("result-set-1",
-                BeanPropertyRowMapper.newInstance(CustomerDTO.class))
+                BeanPropertyRowMapper.newInstance(CustomerBean.class))
                 .useInParameterNames("firstname", "lastname")
                 .declareParameters(
                         new SqlParameter("firstname", Types.VARCHAR),
@@ -76,7 +75,7 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
         this.procGetFirstnames = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName("GET_FIRSTNAMES")
                 .returningResultSet("result-set-1",
-                BeanPropertyRowMapper.newInstance(CustomerNamesDTO.class))
+                BeanPropertyRowMapper.newInstance(CustomerNamesBean.class))
                 .useInParameterNames("ids")
                 .declareParameters(
                         new SqlParameter("ids", Types.ARRAY));
@@ -93,14 +92,14 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 	}
 	
 	@Override
-	public CustomerDTO getCustomer(CustomerDTO customerDTO) {
+	public CustomerBean getCustomer(CustomerBean customerDTO) {
 		
 		SqlParameterSource sqlParameterSource = new BeanPropertySqlParameterSource(customerDTO);
 		
 		Map<String, Object> map = procGetCustomer.execute(sqlParameterSource);
 		
 		@SuppressWarnings("unchecked")
-		List<CustomerDTO> customers = (ArrayList<CustomerDTO>) map.get("result-set-1");
+		List<CustomerBean> customers = (ArrayList<CustomerBean>) map.get("result-set-1");
 		
 		customers.forEach( customer -> logger.info("1.customer: " + customer) );
 		
@@ -108,14 +107,14 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 	}
 	
 	@Override
-	public List<CustomerDTO> getCustomers(CustomerDTO customerDTO) {
+	public List<CustomerBean> getCustomers(CustomerBean customerDTO) {
 		
 		SqlParameterSource sqlParameterSource = new BeanPropertySqlParameterSource(customerDTO);
 		
 		Map<String, Object> map = procGetCustomers.execute(sqlParameterSource);
 		
 		@SuppressWarnings("unchecked")
-		List<CustomerDTO> customers = (ArrayList<CustomerDTO>) map.get("result-set-1");
+		List<CustomerBean> customers = (ArrayList<CustomerBean>) map.get("result-set-1");
 		
 		//customers.forEach( customer -> logger.info("2.customer: " + customer) );
 		
@@ -132,7 +131,7 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 		List<String> names = new ArrayList<>();
 		
 		@SuppressWarnings("unchecked")
-		List<CustomerNamesDTO> namesJdbcArray = (ArrayList<CustomerNamesDTO>) map.get("result-set-1");
+		List<CustomerNamesBean> namesJdbcArray = (ArrayList<CustomerNamesBean>) map.get("result-set-1");
 		
 		if(namesJdbcArray != null) {
 			namesJdbcArray.forEach( nameJdbcArray -> {
@@ -150,7 +149,7 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 	}
 	
 	@Override
-	public InvoiceDTO insertInvoice(InvoiceDTO invoiceDTO) {
+	public InvoiceBean insertInvoice(InvoiceBean invoiceDTO) {
 		
 		//SqlParameterSource parameters = new BeanPropertySqlParameterSource(invoiceDTO);
 		
@@ -167,40 +166,20 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 	}
 	
 	@Override
-	public void insertItem(ItemDTO itemDTO) {
+	public void insertItem(ItemBean itemDTO) {
 		
 		SqlParameterSource parameters = new BeanPropertySqlParameterSource(itemDTO);
 		insertItem.execute(parameters);
 	}
 	
-	public List<InvoiceDTO> getInvoiceDetail(InvoiceDTO invoiceDTO) {
+	@Override
+	public List<InvoiceBean> getInvoiceDetail(InvoiceBean invoiceDTO) {
 		
 		GetInvoiceDetailParams params = new GetInvoiceDetailParams();
-		params.setId(invoiceDTO.getId());
-		List<GetInvoiceDetailRs> rs = spGetInvoiceDetail.execute(params);
+		params.setIds(invoiceDTO.getIds());
+		List<InvoiceBean> invoicesDTO = spGetInvoiceDetail.execute(params);
 		
-		List<InvoiceDTO> list = new ArrayList<>();
-		
-		rs.forEach( (record) -> {
-			
-			List<ItemDTO> items = new ArrayList<ItemDTO>();
-			
-			ItemDTO newItem = new ItemDTO(record.getItem(), record.getProductId(), record.getQuantity(), record.getCost());
-			items.add(newItem);
-			
-			InvoiceDTO newInvoiceDTO = 
-					new InvoiceDTO(record.getId(), record.getCustomerId(), record.getTotal(), items);
-			
-			if(!list.contains(invoiceDTO)) {
-				list.add(newInvoiceDTO);
-			}
-			
-			
-			
-			
-		});
-		
-		return null;
+		return invoicesDTO;
 	}
 	
 }

@@ -8,11 +8,13 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.object.StoredProcedure;
 
+import com.demo.sales.bean.InvoiceBean;
+import com.demo.sales.sp.extractor.GetInvoiceDetailExtractor;
 import com.demo.sales.sp.params.GetInvoiceDetailParams;
-import com.demo.sales.sp.rs.GetInvoiceDetailRs;
 
 public class SpGetInvoiceDetail extends StoredProcedure {
 
@@ -20,18 +22,20 @@ public class SpGetInvoiceDetail extends StoredProcedure {
 	
 	public SpGetInvoiceDetail(DataSource dataSource) {
 		setDataSource(dataSource);
-		setFunction(true);
 		setSql(SQL);
-		declareParameter(new SqlOutParameter("id", Types.INTEGER));
+		declareParameter(new SqlParameter("ids", Types.ARRAY));
+		declareParameter(new SqlReturnResultSet("result-set-1", new GetInvoiceDetailExtractor()));
 		compile();
 	}
 	
-	public List<GetInvoiceDetailRs> execute(GetInvoiceDetailParams parameters) {
+	public List<InvoiceBean> execute(GetInvoiceDetailParams parameters) {
 		Map<String, Object> parametersMap = new HashMap<String, Object>(1);
-		parametersMap.put("id", parameters.getId());
+		parametersMap.put("ids", parameters.getIds());
 		Map<String, Object> results = execute(parametersMap);
 		@SuppressWarnings("unchecked")
-		List<GetInvoiceDetailRs> list = ((ArrayList<GetInvoiceDetailRs>) results.get("#result-set-1"));
+		List<InvoiceBean> list = 
+			((ArrayList<InvoiceBean>) results.get("result-set-1"));
+		
 		return list;
 	}
 	

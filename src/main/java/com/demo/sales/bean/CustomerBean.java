@@ -1,6 +1,6 @@
-package com.demo.sales.dto;
+package com.demo.sales.bean;
 
-public class CustomerDTO {
+public class CustomerBean {
 
 	private int id;
 	private String firstname;
@@ -8,11 +8,11 @@ public class CustomerDTO {
 	private String street;
 	private String city;
 	
-	public CustomerDTO() {
+	public CustomerBean() {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public CustomerDTO(String firstname, String lastname) {
+	public CustomerBean(String firstname, String lastname) {
 		super();
 		this.firstname = firstname;
 		this.lastname = lastname;
@@ -20,12 +20,12 @@ public class CustomerDTO {
 
 
 
-	public CustomerDTO(int id) {
+	public CustomerBean(int id) {
 		super();
 		this.id = id;
 	}
 
-	public CustomerDTO(int id, String firstname, String lastname, String street, String city) {
+	public CustomerBean(int id, String firstname, String lastname, String street, String city) {
 		super();
 		this.id = id;
 		this.firstname = firstname;

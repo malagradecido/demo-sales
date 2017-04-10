@@ -6,11 +6,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.demo.sales.bean.CustomerBean;
+import com.demo.sales.bean.InvoiceBean;
+import com.demo.sales.bean.ItemBean;
+import com.demo.sales.bean.MessageBean;
 import com.demo.sales.dao.ISalesDAO;
-import com.demo.sales.dto.CustomerDTO;
-import com.demo.sales.dto.InvoiceDTO;
-import com.demo.sales.dto.ItemDTO;
-import com.demo.sales.dto.MessageDTO;
 import com.demo.sales.exception.BusinessLogicException;
 import com.demo.sales.services.ISalesService;
 import com.demo.sales.util.BasicSupport;
@@ -22,42 +22,42 @@ public class SalesServiceImpl implements ISalesService {
 	ISalesDAO iSalesDAO;
 	
 	@Override
-	public CustomerDTO getCustomer(CustomerDTO objParameter) throws BusinessLogicException {
+	public CustomerBean getCustomer(CustomerBean parameters) throws BusinessLogicException {
 		
-		if(objParameter.getId() <= 0) {
+		if(parameters.getId() <= 0) {
 			throw new BusinessLogicException(
 					"ERROR_PARAMETER", 
 					"El ID ingresado es incorrecto.");
 		}
 		
-		CustomerDTO customer = iSalesDAO.getCustomer(objParameter);
+		CustomerBean customer = iSalesDAO.getCustomer(parameters);
 		
 		if(customer == null) {
 			throw new BusinessLogicException(
 					"NOT_FOUND", 
-					"Cliente con código: " + objParameter.getId() + " no encontrado.");
+					"Cliente con código: " + parameters.getId() + " no encontrado.");
 		}
 		
 		return customer;
 	}
 	
 	@Override
-	public List<CustomerDTO> getCustomers(CustomerDTO objParameter) throws BusinessLogicException {
+	public List<CustomerBean> getCustomers(CustomerBean parameters) throws BusinessLogicException {
 		
-		if(objParameter.getFirstname().trim().equals("") || objParameter.getLastname().trim().equals("") ) {
+		if(parameters.getFirstname().trim().equals("") || parameters.getLastname().trim().equals("") ) {
 			throw new BusinessLogicException(
 					"ERROR_PARAMETER", 
 					"Debe ingresar al menos un nombre o apellido.");
 		}
 		
-		List<CustomerDTO> customers = iSalesDAO.getCustomers(objParameter);
+		List<CustomerBean> customers = iSalesDAO.getCustomers(parameters);
 		
 		if(customers.size() == 0) {
 			throw new BusinessLogicException(
 					"NOT_FOUND", 
 					"No se encontraron clientes con nombre: <<" + 
-					objParameter.getFirstname() + 
-					">> o con apellido: <<" + objParameter.getLastname() + ">>.");
+					parameters.getFirstname() + 
+					">> o con apellido: <<" + parameters.getLastname() + ">>.");
 		}
 		
 		return customers;
@@ -87,23 +87,23 @@ public class SalesServiceImpl implements ISalesService {
 	}
 	
 	@Override
-	public MessageDTO makePurchase(InvoiceDTO invoiceDTO) throws BusinessLogicException {
+	public MessageBean makePurchase(InvoiceBean parameters) throws BusinessLogicException {
 		
-		if(invoiceDTO.getCustomerId() <= 0) {
+		if(parameters.getCustomerId() <= 0) {
 			throw new BusinessLogicException(
 					"ERROR_PARAMETER", 
 					"Debe ingresar el id de cliente.");
-		} else if(invoiceDTO.getTotal() <= 0) {
+		} else if(parameters.getTotal() <= 0) {
 			throw new BusinessLogicException(
 					"ERROR_PARAMETER", 
 					"Debe ingresar un total mayor a cero.");
-		} else if(invoiceDTO.getItems().size() <= 0) {
+		} else if(parameters.getItems().size() <= 0) {
 			throw new BusinessLogicException(
 					"ERROR_PARAMETER", 
 					"Debe ingresar al menos un item.");
 		}
 		
-		for(ItemDTO item : invoiceDTO.getItems()) {
+		for(ItemBean item : parameters.getItems()) {
 			
 			if(item.getProductId() <= 0) {
 				throw new BusinessLogicException(
@@ -126,9 +126,9 @@ public class SalesServiceImpl implements ISalesService {
 		
 		try {
 			
-			int invoiceId = iSalesDAO.insertInvoice(invoiceDTO).getId();
+			int invoiceId = iSalesDAO.insertInvoice(parameters).getId();
 			
-			invoiceDTO.getItems().forEach( itemDTO -> {
+			parameters.getItems().forEach( itemDTO -> {
 				itemDTO.setInvoiceId( invoiceId );
 				iSalesDAO.insertItem(itemDTO);
 			});
@@ -139,11 +139,35 @@ public class SalesServiceImpl implements ISalesService {
 					e.getMessage() );
 		}
 
-		MessageDTO messageDTO = new MessageDTO();
+		MessageBean messageDTO = new MessageBean();
 		messageDTO.setCode("OK");
 		messageDTO.setDescription("Registrado correctamente");
 		
 		return messageDTO;
+	}
+
+	@Override
+	public List<InvoiceBean> getInvoiceDetail(InvoiceBean parameters) throws BusinessLogicException {
+		
+		if(parameters.getIds() == null || parameters.getIds().length == 0) {
+			throw new BusinessLogicException(
+					"ERROR_PARAMETER", 
+					"Debe ingresar al menos un id.");
+		}
+		
+		Integer[] idsNoDuplicate = BasicSupport.deleteDuplicate(parameters.getIds());
+		parameters.setIds(idsNoDuplicate);
+		
+		List<InvoiceBean> invoicesDTO = iSalesDAO.getInvoiceDetail(parameters);
+		
+		if(invoicesDTO.size() == 0) {
+			throw new BusinessLogicException(
+					"NOT_FOUND", 
+					"No se encontraron facturas con ids: " +
+					Arrays.toString(parameters.getIds()) + ".");
+		}
+		
+		return invoicesDTO;
 	}
 
 }

@@ -1,6 +1,6 @@
-package com.demo.sales.dto;
+package com.demo.sales.bean;
 
-public class MessageDTO {
+public class MessageBean {
 
 	public String code;
 	public String description;

@@ -28,7 +28,7 @@
 	</xs:element>
 
 	<xs:element name="getCustomerResponse">
-		<xs:complexType>
+		<xs:complexType> 
 			<xs:sequence>
 				<xs:element name="customer" type="tns:customer" />
 			</xs:sequence>
@@ -70,6 +70,22 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+	
+	<xs:element name="getInvoiceDetailRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ids" type="tns:ids" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="getInvoiceDetailResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="invoices" type="tns:invoices" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 
 	<xs:complexType name="customer">
 		<xs:sequence>
@@ -80,12 +96,20 @@
 			<xs:element name="city" type="tns:city" />
 		</xs:sequence>
 	</xs:complexType>
+	
+	<xs:complexType name="invoices">
+		<xs:sequence>
+			<xs:element name="invoice" type="tns:invoice" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
 		
 	<xs:complexType name="invoice">
 		<xs:sequence>
 			<xs:element name="id" type="tns:id" />
-			<xs:element name="customerId" type="xs:integer" />
+			<xs:element name="customerId" type="xs:int" />
+			<xs:element name="customerName" type="xs:string" />
 			<xs:element name="total" type="xs:decimal" />
+			<xs:element name="items" type="tns:items" />
 		</xs:sequence>
 	</xs:complexType>
 	
@@ -96,13 +120,29 @@
 			<xs:element name="newItem" type="tns:newItem" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
+	
+	<xs:complexType name="items">
+		<xs:sequence>
+			<xs:element name="items" type="tns:item" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="item">
+		<xs:sequence>
+			<xs:element name="item" type="tns:id" />
+			<xs:element name="productId" type="tns:id" />
+			<xs:element name="productName" type="xs:string" />
+			<xs:element name="quantity" type="xs:int" />
+			<xs:element name="cost" type="xs:decimal" />
+		</xs:sequence>
+	</xs:complexType>
 		
 	<xs:complexType name="newItem">
 		<xs:sequence>
 			<xs:element name="item" type="tns:id" />
 			<xs:element name="productId" type="tns:id" />
-			<xs:element name="quantity" type="xs:integer" />
-			<xs:element name="cost" type="xs:integer" />
+			<xs:element name="quantity" type="xs:int" />
+			<xs:element name="cost" type="xs:decimal" />
 		</xs:sequence>
 	</xs:complexType>
 	
