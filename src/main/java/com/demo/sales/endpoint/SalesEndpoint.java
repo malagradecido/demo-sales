@@ -1,5 +1,6 @@
 package com.demo.sales.endpoint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.transform.TransformerException;
@@ -12,11 +13,12 @@ import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 import org.springframework.ws.server.endpoint.annotation.XPathParam;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.demo.sales.dto.CustomerDTO;
+import com.demo.sales.dto.InvoiceDTO;
+import com.demo.sales.dto.ItemDTO;
+import com.demo.sales.dto.MessageDTO;
 import com.demo.sales.exception.BusinessLogicException;
 import com.demo.sales.exception.ServiceFaultException;
 import com.demo.sales.exception.support.ServiceFault;
@@ -33,6 +35,7 @@ import com.demo.sales.schema.GetFirstnamesRequest;
 import com.demo.sales.schema.GetFirstnamesResponse;
 import com.demo.sales.schema.MakePurchaseRequest;
 import com.demo.sales.schema.MakePurchaseResponse;
+import com.demo.sales.schema.Message;
 
 @Endpoint
 public class SalesEndpoint {
@@ -139,22 +142,38 @@ public class SalesEndpoint {
 		MakePurchaseResponse response = new MakePurchaseResponse();
 		try {
 			String purchaseXMLString = BasicSupport.convertNodeListToString(purchaseNodeList);			
-			logger.info("purchaseXMLString: " + purchaseXMLString);						
+			logger.info("purchaseXMLString: " + purchaseXMLString);
+			
+			List<ItemDTO> items = new ArrayList<>();
+			
+			request.getItems().getItem().forEach(  item -> {
+				ItemDTO itemDTO = new ItemDTO(
+						item.getItem(), item.getProductId(), 
+						item.getQuantity().intValue(), 
+						item.getCost().doubleValue());
+				
+				items.add(itemDTO);
+			});
+			
+			InvoiceDTO invoice = new InvoiceDTO(
+					request.getId(), request.getCustomerId(), request.getTotal().doubleValue(), items);
+			
+			MessageDTO messageDTO = iSalesService.makePurchase(invoice);
+			
+			Message message = new Message();
+			message.setCode(messageDTO.getCode());
+			message.setDescription(messageDTO.getDescription());
+			response.setMessage(message);
 			
 		} catch (TransformerException e) {
 			e.printStackTrace();
 			throw new ServiceFaultException("ERROR", 
 					new ServiceFault( "ERROR_CONVERT" , e.getMessage() ));
-		}
-		
-		
-		
-		/*try {
-			customerDTO = iSalesService.getCustomer(parameters);
+			
 		} catch (BusinessLogicException e) {
 			throw new ServiceFaultException("ERROR", 
 					new ServiceFault( e.getCode() , e.getDescription() ));
-		}*/
+		}
 		
 		return response;
 	}

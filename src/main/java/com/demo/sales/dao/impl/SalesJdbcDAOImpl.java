@@ -2,6 +2,8 @@ package com.demo.sales.dao.impl;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,11 +20,18 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 //import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
 import com.demo.sales.dao.ISalesDAO;
 import com.demo.sales.dto.CustomerDTO;
 import com.demo.sales.dto.CustomerNamesDTO;
+import com.demo.sales.dto.InvoiceDTO;
+import com.demo.sales.dto.ItemDTO;
+import com.demo.sales.sp.SpGetInvoiceDetail;
+import com.demo.sales.sp.SpGetSysdate;
+import com.demo.sales.sp.params.GetInvoiceDetailParams;
+import com.demo.sales.sp.rs.GetInvoiceDetailRs;
 
 @Component
 public class SalesJdbcDAOImpl implements ISalesDAO {
@@ -30,22 +39,22 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 	private static final Logger logger = Logger.getLogger(SalesJdbcDAOImpl.class);
 
 	private JdbcTemplate jdbcTemplate;
-//	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-	
-	@Autowired
-    public void setDataSource(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
-	
 	private SimpleJdbcCall procGetCustomer;
 	private SimpleJdbcCall procGetCustomers;
 	private SimpleJdbcCall procGetFirstnames;
+	private SimpleJdbcInsert insertInvoice;
+	private SimpleJdbcInsert insertItem;
+	private SpGetSysdate spGetSysdate;
+	private SpGetInvoiceDetail spGetInvoiceDetail;
+	
+	@Autowired
+	private DataSource dataSource;
 	
 	@PostConstruct
 	public void init() {
 
-		jdbcTemplate.setResultsMapCaseInsensitive(true);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate.setResultsMapCaseInsensitive(true);
 		
         this.procGetCustomer = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName("GET_CUSTOMER")
@@ -72,6 +81,15 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
                 .declareParameters(
                         new SqlParameter("ids", Types.ARRAY));
         
+        this.insertInvoice = new SimpleJdbcInsert(dataSource)
+        		.withTableName("invoice");
+        
+        this.insertItem = new SimpleJdbcInsert(dataSource)
+        		.withTableName("item");
+        
+        this.spGetSysdate = new SpGetSysdate(dataSource);
+        
+        this.spGetInvoiceDetail = new SpGetInvoiceDetail(dataSource);
 	}
 	
 	@Override
@@ -128,8 +146,61 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 			});
 		}
 		
-		
 		return names;
+	}
+	
+	@Override
+	public InvoiceDTO insertInvoice(InvoiceDTO invoiceDTO) {
+		
+		//SqlParameterSource parameters = new BeanPropertySqlParameterSource(invoiceDTO);
+		
+		Date date = spGetSysdate.execute();
+		logger.info("fecha--> " + date);
+		
+		Map<String, Object> parameters = new HashMap<String, Object>(3);
+		parameters.put("id", invoiceDTO.getId());
+        parameters.put("customerId", invoiceDTO.getCustomerId());
+        parameters.put("total", invoiceDTO.getTotal());
+        insertInvoice.execute(parameters);  
+		
+		return invoiceDTO;
+	}
+	
+	@Override
+	public void insertItem(ItemDTO itemDTO) {
+		
+		SqlParameterSource parameters = new BeanPropertySqlParameterSource(itemDTO);
+		insertItem.execute(parameters);
+	}
+	
+	public List<InvoiceDTO> getInvoiceDetail(InvoiceDTO invoiceDTO) {
+		
+		GetInvoiceDetailParams params = new GetInvoiceDetailParams();
+		params.setId(invoiceDTO.getId());
+		List<GetInvoiceDetailRs> rs = spGetInvoiceDetail.execute(params);
+		
+		List<InvoiceDTO> list = new ArrayList<>();
+		
+		rs.forEach( (record) -> {
+			
+			List<ItemDTO> items = new ArrayList<ItemDTO>();
+			
+			ItemDTO newItem = new ItemDTO(record.getItem(), record.getProductId(), record.getQuantity(), record.getCost());
+			items.add(newItem);
+			
+			InvoiceDTO newInvoiceDTO = 
+					new InvoiceDTO(record.getId(), record.getCustomerId(), record.getTotal(), items);
+			
+			if(!list.contains(invoiceDTO)) {
+				list.add(newInvoiceDTO);
+			}
+			
+			
+			
+			
+		});
+		
+		return null;
 	}
 	
 }

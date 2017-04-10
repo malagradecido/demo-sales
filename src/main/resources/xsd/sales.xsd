@@ -55,7 +55,10 @@
 	<xs:element name="makePurchaseRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="purchase" type="tns:purchase" maxOccurs="unbounded" />
+				<xs:element name="id" type="tns:id" />
+				<xs:element name="customerId" type="tns:id" />
+				<xs:element name="total" type="xs:decimal" />
+				<xs:element name="items" type="tns:newItems" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -90,15 +93,22 @@
 		<xs:sequence>
 			<xs:element name="customerId" type="tns:id" />
 			<xs:element name="total" type="xs:decimal" />
-			<xs:element name="newItem" type="tns:newItem" />
+			<xs:element name="newItem" type="tns:newItem" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 		
 	<xs:complexType name="newItem">
 		<xs:sequence>
+			<xs:element name="item" type="tns:id" />
 			<xs:element name="productId" type="tns:id" />
 			<xs:element name="quantity" type="xs:integer" />
 			<xs:element name="cost" type="xs:integer" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="newItems" >
+		<xs:sequence>
+			<xs:element maxOccurs="unbounded" name="item" type="tns:newItem" />
 		</xs:sequence>
 	</xs:complexType>
 	

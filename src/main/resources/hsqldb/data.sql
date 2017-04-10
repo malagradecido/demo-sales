@@ -98,7 +98,7 @@ INSERT INTO Customer VALUES(48,'Robert','White','549 Seventh Av.','San Francisco
 INSERT INTO Product VALUES(48,'Clock Clock',210);
 INSERT INTO Customer VALUES(49,'George','Fuller','534 - 20th Ave.','Olten');
 INSERT INTO Product VALUES(49,'Iron Iron',22);
-INSERT INTO Invoice VALUES(0,0,0.0);
+INSERT INTO Invoice VALUES(0,0,0.0); 
 INSERT INTO Invoice VALUES(1,33,0.0);
 INSERT INTO Invoice VALUES(2,23,0.0);
 INSERT INTO Invoice VALUES(3,21,0.0);
