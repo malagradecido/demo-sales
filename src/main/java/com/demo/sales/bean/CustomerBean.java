@@ -1,11 +1,20 @@
 package com.demo.sales.bean;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="customer")
 public class CustomerBean {
 
+	@XmlElement
 	private int id;
+	@XmlElement
 	private String firstname;
+	@XmlElement
 	private String lastname;
+	@XmlElement
 	private String street;
+	@XmlElement
 	private String city;
 	
 	public CustomerBean() {
