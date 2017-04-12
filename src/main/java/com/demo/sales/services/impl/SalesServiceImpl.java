@@ -3,6 +3,7 @@ package com.demo.sales.services.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,8 @@ import com.demo.sales.util.BasicSupport;
 @Component
 public class SalesServiceImpl implements ISalesService {
 
+	private static final Logger logger = Logger.getLogger(SalesServiceImpl.class);
+	
 	@Autowired
 	ISalesDAO iSalesDAO;
 	
@@ -147,27 +150,100 @@ public class SalesServiceImpl implements ISalesService {
 	}
 
 	@Override
-	public List<InvoiceBean> getInvoiceDetail(InvoiceBean parameters) throws BusinessLogicException {
+	public List<InvoiceBean> getInvoiceDetail(Integer[] ids) throws BusinessLogicException {
 		
-		if(parameters.getIds() == null || parameters.getIds().length == 0) {
+		if(ids == null || ids.length == 0) {
 			throw new BusinessLogicException(
 					"ERROR_PARAMETER", 
 					"Debe ingresar al menos un id.");
 		}
 		
-		Integer[] idsNoDuplicate = BasicSupport.deleteDuplicate(parameters.getIds());
-		parameters.setIds(idsNoDuplicate);
+		Integer[] idsNoDuplicate = BasicSupport.deleteDuplicate(ids);
 		
-		List<InvoiceBean> invoicesDTO = iSalesDAO.getInvoiceDetail(parameters);
+		List<InvoiceBean> invoicesDTO = iSalesDAO.getInvoiceDetail(idsNoDuplicate);
 		
 		if(invoicesDTO.size() == 0) {
 			throw new BusinessLogicException(
 					"NOT_FOUND", 
 					"No se encontraron facturas con ids: " +
-					Arrays.toString(parameters.getIds()) + ".");
+					Arrays.toString(ids) + ".");
 		}
 		
 		return invoicesDTO;
+	}
+
+	@Override
+	public MessageBean updateCustomers(List<CustomerBean> lstCustomerBean) throws BusinessLogicException {
+		
+		if(lstCustomerBean == null || lstCustomerBean.size() == 0) {
+			throw new BusinessLogicException(
+					"ERROR_PARAMETER", 
+					"Debe ingresar al menos un id.");
+		}
+		
+		for (CustomerBean customerBean : lstCustomerBean) {
+			
+			if(customerBean.getId() == 0) {
+				throw new BusinessLogicException(
+						"ERROR_PARAMETER", 
+						"El id " + customerBean.getId() + " es inválido");
+			} else if(customerBean.getFirstname() == null || customerBean.getFirstname().trim().equals("")) {
+				throw new BusinessLogicException(
+						"ERROR_PARAMETER", 
+						"Debe ingresar un nombre correcto para el id: " + customerBean.getId());
+			} else if(customerBean.getLastname() == null || customerBean.getLastname().trim().equals("")) {
+				throw new BusinessLogicException(
+						"ERROR_PARAMETER", 
+						"Debe ingresar un apellido correcto para el id: " + customerBean.getId());
+			}
+		}
+		
+		try {
+			
+			int[][] count = iSalesDAO.batchCustomersUpdate(lstCustomerBean);
+			logger.info("count batch update: " + count);
+			
+		} catch (Exception e) {
+			throw new BusinessLogicException(
+					"ERROR_BD", 
+					e.getMessage() );
+		}
+
+		MessageBean messageDTO = new MessageBean();
+		messageDTO.setCode("OK");
+		messageDTO.setDescription("Información se actualizará progresivamente");
+		
+		return messageDTO;
+	}
+	
+	@Override
+	public MessageBean updateCustomer(CustomerBean parameters) throws BusinessLogicException {
+		
+		if(parameters.getId() <= 0) {
+			throw new BusinessLogicException(
+					"ERROR_PARAMETER", 
+					"El ID ingresado es incorrecto.");
+		} else if(parameters.getFirstname() == null || parameters.getFirstname().trim().equals("")) {
+			throw new BusinessLogicException(
+					"ERROR_PARAMETER", 
+					"El nombre ingresado es incorrecto.");
+		}
+		
+		try {
+			
+			iSalesDAO.updateCustomer(parameters);
+			
+		} catch (Exception e) {
+			throw new BusinessLogicException(
+					"ERROR_BD", 
+					e.getMessage() );
+		}
+
+		MessageBean messageDTO = new MessageBean();
+		messageDTO.setCode("OK");
+		messageDTO.setDescription("Actualizado correctamente");
+		
+		return messageDTO;
 	}
 
 }

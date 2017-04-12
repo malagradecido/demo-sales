@@ -18,6 +18,13 @@ public class DemoSalesApplication {
 		SpringApplication.run(DemoSalesApplication.class, args);
 	}
 	
+	/*@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+		// TODO Auto-generated method stub
+		// return super.configure(builder);
+		return builder.sources(DemoWsProducerApplication.class);
+	}*/
+	
 	@Bean
 	CommandLineRunner lookup(ISalesDAO iSalesDAO) {
 		return args -> {

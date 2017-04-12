@@ -48,6 +48,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>javax.servlet</groupId> -->
+<!-- 			<artifactId>servlet-api</artifactId> -->
+<!-- 			<version>2.5</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
+
         <!-- transforma a representacion xml -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -75,6 +82,13 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			 <!--
+			<plugin>
+				<groupId>org.wildfly.plugins</groupId>
+				<artifactId>wildfly-maven-plugin</artifactId>
+				<version>1.1.0.Final</version>
+			</plugin>
+			 -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>

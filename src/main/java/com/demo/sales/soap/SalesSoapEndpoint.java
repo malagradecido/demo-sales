@@ -1,4 +1,4 @@
-package com.demo.sales.endpoint;
+package com.demo.sales.soap;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -45,10 +45,10 @@ import com.demo.sales.schema.MakePurchaseResponse;
 import com.demo.sales.schema.Message;
 
 @Endpoint
-public class SalesEndpoint {
+public class SalesSoapEndpoint {
 
 	private static final String NAMESPACE_URI = "http://demo.com/sales/schema";
-	private static final Logger logger = Logger.getLogger(SalesEndpoint.class);
+	private static final Logger logger = Logger.getLogger(SalesSoapEndpoint.class);
 		
 	@Autowired
 	private ISalesService iSalesService;
@@ -196,13 +196,12 @@ public class SalesEndpoint {
 		Integer[] ids = 
 				request.getIds() == null ? 
 						null : request.getIds().getId().toArray(new Integer[request.getIds().getId().size()]);
-		
-		InvoiceBean parameters = new InvoiceBean(ids);
+
 		Invoices invoices = new Invoices();
 		
 		try {
 			
-			List<InvoiceBean> invoicesDTO = iSalesService.getInvoiceDetail(parameters);
+			List<InvoiceBean> invoicesDTO = iSalesService.getInvoiceDetail(ids);
 			
 			invoicesDTO.forEach( (invoiceDTO) -> {
 				

@@ -1,7 +1,10 @@
 package com.demo.sales.dao.impl;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -173,13 +177,33 @@ public class SalesJdbcDAOImpl implements ISalesDAO {
 	}
 	
 	@Override
-	public List<InvoiceBean> getInvoiceDetail(InvoiceBean invoiceDTO) {
+	public List<InvoiceBean> getInvoiceDetail(Integer[] ids) {
 		
-		GetInvoiceDetailParams params = new GetInvoiceDetailParams();
-		params.setIds(invoiceDTO.getIds());
+		GetInvoiceDetailParams params = new GetInvoiceDetailParams(ids);
 		List<InvoiceBean> invoicesDTO = spGetInvoiceDetail.execute(params);
 		
 		return invoicesDTO;
 	}
+	
+	@Override
+	public int[][] batchCustomersUpdate(final Collection<CustomerBean> customerBean) {
+        int[][] updateCounts = jdbcTemplate.batchUpdate(
+                "update customer set firstname = ?, lastname = ? where id = ?",
+                customerBean,
+                2,
+                new ParameterizedPreparedStatementSetter<CustomerBean>() {
+                    public void setValues(PreparedStatement ps, CustomerBean argument) throws SQLException {
+                        ps.setString(1, argument.getFirstname());
+                        ps.setString(2, argument.getLastname());
+                        ps.setInt(3, argument.getId());
+                    }
+                });
+        return updateCounts;
+    }
+	
+	@Override
+	public void updateCustomer(CustomerBean customerBean) {
+        this.jdbcTemplate.update("update customer set firstname = ? where id = ?", customerBean.getFirstname(), customerBean.getId());
+    }
 	
 }

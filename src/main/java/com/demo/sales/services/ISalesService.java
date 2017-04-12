@@ -20,6 +20,10 @@ public interface ISalesService {
 
 	MessageBean makePurchase(InvoiceBean invoice) throws BusinessLogicException;
 
-	List<InvoiceBean> getInvoiceDetail(InvoiceBean parameters) throws BusinessLogicException;
+	List<InvoiceBean> getInvoiceDetail(Integer[] ids) throws BusinessLogicException;
+
+	MessageBean updateCustomers(List<CustomerBean> lstCustomerBean) throws BusinessLogicException;
+
+	MessageBean updateCustomer(CustomerBean parameters) throws BusinessLogicException;
 
 }
