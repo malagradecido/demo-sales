@@ -20,13 +20,12 @@ import com.demo.sales.bean.MessageBean;
 import com.demo.sales.exception.BusinessLogicException;
 import com.demo.sales.exception.support.ErrorRest;
 import com.demo.sales.services.ISalesService;
-import com.demo.sales.soap.SalesSoapEndpoint;
 
 @RestController
 @RequestMapping("/sales")
 public class SalesRestEndpoint {
 
-	private static final Logger logger = Logger.getLogger(SalesSoapEndpoint.class);
+	private static final Logger logger = Logger.getLogger(SalesRestEndpoint.class);
 	
 	@Autowired
 	private ISalesService iSalesService;
