@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.demo.sales.bean.CustomerBean;
-import com.demo.sales.endpoint.SalesEndpoint;
 import com.demo.sales.exception.BusinessLogicException;
 import com.demo.sales.exception.support.ErrorRest;
 import com.demo.sales.services.ISalesService;
+import com.demo.sales.soap.SalesSoapEndpoint;
 
 @RestController
 @RequestMapping("/sales")
-public class SalesController {
+public class SalesRestEndpoint {
 
-	private static final Logger logger = Logger.getLogger(SalesEndpoint.class);
+	private static final Logger logger = Logger.getLogger(SalesSoapEndpoint.class);
 	
 	@Autowired
 	private ISalesService iSalesService;
