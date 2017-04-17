@@ -196,13 +196,12 @@ public class SalesSoapEndpoint {
 		Integer[] ids = 
 				request.getIds() == null ? 
 						null : request.getIds().getId().toArray(new Integer[request.getIds().getId().size()]);
-		
-		InvoiceBean parameters = new InvoiceBean(ids);
+
 		Invoices invoices = new Invoices();
 		
 		try {
 			
-			List<InvoiceBean> invoicesDTO = iSalesService.getInvoiceDetail(parameters);
+			List<InvoiceBean> invoicesDTO = iSalesService.getInvoiceDetail(ids);
 			
 			invoicesDTO.forEach( (invoiceDTO) -> {
 				

@@ -10,12 +10,12 @@ public class InvoiceBean {
 	private String customerName;
 	private Double total;
 	private List<ItemBean> items;
-	private Integer[] ids;
+	//private Integer[] ids;
 	
-	public InvoiceBean(Integer[] ids) {
+	/*public InvoiceBean(Integer[] ids) {
 		super();
 		this.ids = ids;
-	}
+	}*/
 
 	public InvoiceBean() {
 	}
@@ -100,13 +100,13 @@ public class InvoiceBean {
 		return true;
 	}
 
-	public Integer[] getIds() {
+	/*public Integer[] getIds() {
 		return ids;
 	}
 
 	public void setIds(Integer[] ids) {
 		this.ids = ids;
-	}
+	}*/
 
 	public String getCustomerName() {
 		return customerName;

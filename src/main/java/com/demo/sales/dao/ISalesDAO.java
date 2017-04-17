@@ -1,5 +1,6 @@
 package com.demo.sales.dao;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -21,5 +22,9 @@ public interface ISalesDAO {
 
 	InvoiceBean insertInvoice(InvoiceBean invoiceDTO);
 
-	List<InvoiceBean> getInvoiceDetail(InvoiceBean invoiceDTO);
+	List<InvoiceBean> getInvoiceDetail(Integer[] ids);
+
+	int[][] batchCustomersUpdate(Collection<CustomerBean> customerBean);
+
+	void updateCustomer(CustomerBean customerBean);
 }
