@@ -1,9 +1,11 @@
 package com.demo.sales.config;
 
 import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
@@ -25,9 +27,10 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 @EnableRabbit
 public class RabbitConfig implements RabbitListenerConfigurer {
 	
-	public final static String myQueueName = "my-queue";
-	public final static String deadLetterMyQueueName = "dead-letter-my-queue";
-	public final static String myWorkQueueName = "my-work-queue";
+	public final static String myQueue = "my-queue";
+	public final static String deadLetterMyQueue = "dead-letter-my-queue";
+	public final static String myWorkQueue = "my-work-queue";
+	public final static String myPublishSubscribe = "my-publish-subscribe";
 	
 	@Bean
     public ConnectionFactory connectionFactory() {
@@ -60,16 +63,16 @@ public class RabbitConfig implements RabbitListenerConfigurer {
     
     @Bean
     Queue myQueue() {
-//        return new Queue(myQueueName, false);
-    	return QueueBuilder.durable(myQueueName)
+//        return new Queue(myQueue, false);
+    	return QueueBuilder.durable(myQueue)
         .withArgument("x-dead-letter-exchange", "")
-        .withArgument("x-dead-letter-routing-key", deadLetterMyQueueName)
+        .withArgument("x-dead-letter-routing-key", deadLetterMyQueue)
         .build();
     }
     
     @Bean
     Queue deadLetterMyQueue() {
-        return QueueBuilder.durable( deadLetterMyQueueName ).build();
+        return QueueBuilder.durable( deadLetterMyQueue ).build();
     }
     
 	@Bean
@@ -79,7 +82,7 @@ public class RabbitConfig implements RabbitListenerConfigurer {
 	
 	@Bean
     Binding myQueueBinding() {
-        return BindingBuilder.bind( myQueue() ).to( myQueueExchange() ).with( myQueueName );
+        return BindingBuilder.bind( myQueue() ).to( myQueueExchange() ).with( myQueue );
     }
 	
 	/*
@@ -91,13 +94,13 @@ public class RabbitConfig implements RabbitListenerConfigurer {
     Queue myWorkQueue() {
 		//Cualquier mensaje que se encuentre en la cola no sera eliminado
 		//asi se reinicie el servidor rabbitmq
-		return new Queue(myWorkQueueName, true);
+		return new Queue(myWorkQueue, true);
     }
 	
 	@Bean
     Binding myWorkQueueBinding() {
         return BindingBuilder.bind(
-        		myWorkQueue() ).to( myWorkQueueExchange() ).with( myWorkQueueName );
+        		myWorkQueue() ).to( myWorkQueueExchange() ).with( myWorkQueue );
     }
 	
 	@Bean
@@ -127,13 +130,87 @@ public class RabbitConfig implements RabbitListenerConfigurer {
 	   registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
 	}
 	
-//	@Bean
-//	public RabbitListenerContainerFactory<SimpleMessageListenerContainer> prefetchTwoRabbitListenerContainerFactory() {
-//	    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-//	    factory.setConnectionFactory(connectionFactory());
-//	    factory.setPrefetchCount(2);
-//	    return factory;
-//	}
+	/*
+	 * Publicacion / Suscripcion: Envia mensaje de cola a todos los que se suscribieron a publicacion
+	 */
+	
+	@Bean
+	public FanoutExchange myPublishSubscribeExchange() {
+		return new FanoutExchange(myPublishSubscribe);
+	}
+	
+	@Bean
+	public Queue autoDeleteQueue1() {
+	    return new AnonymousQueue();
+	}
+
+	@Bean
+	public Queue autoDeleteQueue2() {
+	    return new AnonymousQueue();
+	}
+	
+	@Bean
+    public Binding binding1(FanoutExchange fanout,
+        Queue autoDeleteQueue1) {
+        return BindingBuilder.bind(autoDeleteQueue1).to(fanout);
+    }
+
+    @Bean
+    public Binding binding2(FanoutExchange fanout,
+        Queue autoDeleteQueue2) {
+        return BindingBuilder.bind(autoDeleteQueue2).to(fanout);
+    }
+	
+    /*
+     * Routing: Envia mensaje a un determinado intercambio segun el routing indicado 
+     */
+    
+    @Bean
+    public DirectExchange direct() {
+        return new DirectExchange("tut.direct");
+    }
+    
+    @Bean
+    public Queue autoDeleteQueue3() {
+        return new AnonymousQueue();
+    }
+
+    @Bean
+    public Queue autoDeleteQueue4() {
+        return new AnonymousQueue();
+    }
+
+    @Bean
+    public Binding binding1a(DirectExchange direct, 
+        Queue autoDeleteQueue3) {
+        return BindingBuilder.bind(autoDeleteQueue3)
+            .to(direct)
+            .with("orange");
+    }
+
+    @Bean
+    public Binding binding1b(DirectExchange direct, 
+        Queue autoDeleteQueue3) {
+        return BindingBuilder.bind(autoDeleteQueue3)
+            .to(direct)
+            .with("black");
+    }
+
+    @Bean
+    public Binding binding2a(DirectExchange direct,
+        Queue autoDeleteQueue4) {
+        return BindingBuilder.bind(autoDeleteQueue4)
+            .to(direct)
+            .with("green");
+    }
+
+    @Bean
+    public Binding binding2b(DirectExchange direct, 
+        Queue autoDeleteQueue4) {
+        return BindingBuilder.bind(autoDeleteQueue4)
+            .to(direct)
+            .with("black");
+    }
 
     /*@Bean
     TopicExchange exchange() {

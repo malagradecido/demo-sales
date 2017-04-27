@@ -8,6 +8,8 @@ import java.util.Random;
 import org.iban4j.Iban;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,11 +38,11 @@ public class SalesScheduledTasks {
 //    	String mensaje = "Mi cola simple!";
 //    	log.info("Enviando mensaje a cola simple... ");
 //    	rabbitTemplate.convertAndSend(
-//    			RabbitConfig.myQueueName, 
+//    			RabbitConfig.myQueue, 
 //    			(mensaje + " -> " + dateFormat.format(new Date())) );
 //    }
     
-    @Scheduled(fixedRate=1000)
+//    @Scheduled(fixedRate=1000)
     public void sendMyQueue() {
     	PaymentOrderBean paymentOrder = new PaymentOrderBean(
                 Iban.random().toFormattedString(),
@@ -49,7 +51,7 @@ public class SalesScheduledTasks {
 
         log.info("Sending payload \'{}\'", paymentOrder);
     	rabbitTemplate.convertAndSend(
-    			RabbitConfig.myQueueName, 
+    			RabbitConfig.myQueue, 
     			paymentOrder );
     }
     
@@ -70,6 +72,45 @@ public class SalesScheduledTasks {
 		String message = builder.toString();
 		rabbitTemplate.convertAndSend("my-work-queue-exchange", "my-work-queue" , message);
 		log.info(" [x] Sent '" + message + "'");
+    }
+    
+    @Autowired
+    private FanoutExchange fanout;
+
+//    @Scheduled(fixedDelay = 1000, initialDelay = 500)
+    public void send() {
+        StringBuilder builder = new StringBuilder("Hello");
+        if (dots++ == 3) {
+            dots = 1;
+        }
+        for (int i = 0; i < dots; i++) {
+            builder.append('.');
+        }
+        builder.append(Integer.toString(++count));
+        String message = builder.toString();
+        rabbitTemplate.convertAndSend(fanout.getName(), "", message);
+        System.out.println(" [x] Sent '" + message + "'");
+    }
+    
+    @Autowired
+    private DirectExchange direct;
+
+    private int index;
+
+    private final String[] keys = {"orange", "black", "green"};
+
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)
+    public void send2() {
+        StringBuilder builder = new StringBuilder("Hello to ");
+        if (++this.index == 3) {
+            this.index = 0;
+        }
+        String key = keys[this.index];
+        builder.append(key).append(' ');
+        builder.append(Integer.toString(++this.count));
+        String message = builder.toString();
+        rabbitTemplate.convertAndSend(direct.getName(), key, message);
+        System.out.println(" [x] Sent '" + message + "'");
     }
     
 }
