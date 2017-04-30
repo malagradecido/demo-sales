@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.demo.sales.bean.PaymentOrderBean;
 import com.demo.sales.config.RabbitConfig;
 
+@SuppressWarnings("unused")
 @Component
 public class SalesScheduledTasks {
 
@@ -99,7 +100,7 @@ public class SalesScheduledTasks {
 
     private final String[] keys = {"orange", "black", "green"};
 
-    @Scheduled(fixedDelay = 1000, initialDelay = 500)
+//    @Scheduled(fixedDelay = 1000, initialDelay = 500)
     public void send2() {
         StringBuilder builder = new StringBuilder("Hello to ");
         if (++this.index == 3) {
